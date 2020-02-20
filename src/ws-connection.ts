@@ -94,10 +94,10 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
   }
 
   public close() {
-    if (this.connection) {
-      this.connection.dispose();
-    }
-    this.socket.close();
+    // if (this.connection) {
+    //   this.connection.dispose();
+    // }
+    // this.socket.close();
   }
 
   public getDocumentUri() {
@@ -189,6 +189,19 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
       this.sendChange();
     }, (e) => {
     });
+  }
+
+  public open() {
+    const textDocumentMessage: lsProtocol.DidOpenTextDocumentParams = {
+      textDocument: {
+        uri: this.documentInfo.documentUri,
+        languageId: this.documentInfo.languageId,
+        text: this.documentInfo.documentText(),
+        version: this.documentVersion,
+      } as lsProtocol.TextDocumentItem,
+    };
+    this.connection.sendNotification('textDocument/didOpen', textDocumentMessage);
+    this.sendChange();
   }
 
   public sendChange() {

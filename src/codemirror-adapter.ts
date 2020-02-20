@@ -169,6 +169,10 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       // Special case for completion on the completion trigger itself, the completion goes after
       start = this.token.end;
     }
+    let staticHints =
+      this.editor.state.completionActive &&
+      this.editor.state.completionActive.data &&
+      this.editor.state.completionActive.data.list || [];
 
     this.editor.showHint({
       completeSingle: false,
@@ -176,7 +180,15 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
         return {
           from: start,
           to: this.token.end,
-          list: bestCompletions.map((completion) => completion.label),
+          list: [
+            ...(bestCompletions.map(function(completion) {
+              return {
+                text: completion.insertText ? completion.insertText : completion.label,
+                displayText: completion.label + (completion.detail ? ' - ' + completion.detail : '')
+              }
+            })),
+            ...staticHints
+          ],
         };
       },
     } as CodeMirror.ShowHintOptions);
