@@ -1,6 +1,10 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Location, LocationLink } from 'vscode-languageserver-protocol';
 
+export interface ICallback {
+	(err: Error, ret: any): any;
+};
+
 export interface IPosition {
   line: number;
   ch: number;
@@ -132,6 +136,7 @@ export interface ILspConnection {
    * Does the server support find all references?
    */
   isReferencesSupported(): boolean;
+  sendRequest(method: string, data: any, cb: ICallback): void;
 }
 
 /**

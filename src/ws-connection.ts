@@ -4,7 +4,7 @@ import * as events from 'events';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { LocationLink, ServerCapabilities } from 'vscode-languageserver-protocol';
 import { registerServerCapability, unregisterServerCapability } from './server-capability-registration';
-import { ILspConnection, ILspOptions, IPosition, ITokenInfo } from './types';
+import { ILspConnection, ILspOptions, IPosition, ITokenInfo, ICallback } from './types';
 
 interface IFilesServerClientCapabilities {
   /* ... all fields from the base ClientCapabilities ... */
@@ -487,6 +487,17 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
    */
   public isReferencesSupported() {
     return !!(this.serverCapabilities && this.serverCapabilities.referencesProvider);
+  }
+
+  public sendRequest(method: string, data: any, cb: ICallback) {
+    if (!this.isConnected) {
+		cb(new Error('NotConnected'), null);
+		return;
+    }
+	  
+    this.connection.sendRequest(method, data).then((ret: any) => {
+	    cb(null, ret);
+	});
   }
 }
 
