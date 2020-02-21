@@ -293,3 +293,33 @@ export function getFilledDefaults(options: ITextEditorOptions): ITextEditorOptio
     formatOnPaste: false,
   }, options);
 }
+
+// seho.ahn
+export const CompletionItemKindArray: Array<string> = [
+  'NULL',
+  'TEXT',
+  'METHOD',
+  'FUNCTION',
+  'CONSTRUCTOR',
+  'FIELD',
+  'VARIABLE',
+  'CLASS',
+  'INTERFACE',
+  'MODULE',
+  'PROPERTY',
+  'UNIT',
+  'VALUE',
+  'ENUM',
+  'KEYWORD',
+  'SNIPPET',
+  'COLOR',
+  'FILE',
+  'REFERENCE',
+  'FOLDER',
+  'ENUMMEMBER',
+  'CONSTANT',
+  'STRUCT',
+  'EVENT',
+  'OPERATOR',
+  'TYPEPARAMETER'
+];

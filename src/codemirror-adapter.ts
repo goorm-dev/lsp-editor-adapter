@@ -4,7 +4,7 @@
 import debounce from 'lodash-es/debounce';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Location, LocationLink, MarkupContent } from 'vscode-languageserver-protocol';
-import { getFilledDefaults, IEditorAdapter, ILspConnection, IPosition, ITextEditorOptions, ITokenInfo } from './types';
+import { getFilledDefaults, IEditorAdapter, ILspConnection, IPosition, ITextEditorOptions, ITokenInfo, CompletionItemKindArray } from './types';
 
 interface IScreenCoord {
   x: number;
@@ -196,6 +196,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 iconNode.classList.add("CodeMirror-hint-icon");
                 textNode.classList.add("CodeMirror-hint-text");
                 descNode.classList.add("CodeMirror-hint-desc");
+                iconNode.appendChild(document.createTextNode(CompletionItemKindArray[completion.kind]));
                 textNode.appendChild(document.createTextNode(data.text));
                 descNode.appendChild(document.createTextNode(completion.detail ? completion.detail : ''));
                 Element.appendChild(iconNode);
