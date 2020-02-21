@@ -184,12 +184,24 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
             ...(bestCompletions.map(function(completion) {
               let ret:any = {};
               ret.text = completion.insertText ? completion.insertText : completion.label;
-              ret.displayText = completion.label + (completion.detail ? ' - ' + completion.detail : '');
               if (completion.textEdit) {
                 ret.text = completion.textEdit.newText;
                 ret.from = { line: completion.textEdit.range.start.line, ch: completion.textEdit.range.start.character };
                 ret.to = { line: completion.textEdit.range.end.line, ch: completion.textEdit.range.end.character };
               }
+              ret.render = function(Element:any, self:any, data:any) {
+                let iconNode = document.createElement("DIV");
+                let textNode = document.createElement("DIV");
+                let descNode = document.createElement("DIV");
+                iconNode.classList.add("CodeMirror-hint-icon");
+                textNode.classList.add("CodeMirror-hint-text");
+                descNode.classList.add("CodeMirror-hint-desc");
+                textNode.appendChild(document.createTextNode(data.text));
+                descNode.appendChild(document.createTextNode(completion.detail ? completion.detail : ''));
+                Element.appendChild(iconNode);
+                Element.appendChild(textNode);
+                Element.appendChild(descNode);
+              };
               return ret;
             })),
             ...staticHints
