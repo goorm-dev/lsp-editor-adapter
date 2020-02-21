@@ -142,6 +142,9 @@ class LspWsConnectionManager extends events.EventEmitter {
             dynamicRegistration: true,
             linkSupport: true,
           },
+          references: {
+            dynamicRegistration: true,
+          },
           typeDefinition: {
             dynamicRegistration: true,
             linkSupport: true,

@@ -182,10 +182,15 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
           to: this.token.end,
           list: [
             ...(bestCompletions.map(function(completion) {
-              return {
-                text: completion.insertText ? completion.insertText : completion.label,
-                displayText: completion.label + (completion.detail ? ' - ' + completion.detail : '')
+              let ret:any = {};
+              ret.text = completion.insertText ? completion.insertText : completion.label;
+              ret.displayText = completion.label + (completion.detail ? ' - ' + completion.detail : '');
+              if (completion.textEdit) {
+                ret.text = completion.textEdit.newText;
+                ret.from = { line: completion.textEdit.range.start.line, ch: completion.textEdit.range.start.character };
+                ret.to = { line: completion.textEdit.range.end.line, ch: completion.textEdit.range.end.character };
               }
+              return ret;
             })),
             ...staticHints
           ],
@@ -326,9 +331,9 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       this.connection.getDocumentHighlights(this.editor.getDoc().getCursor('start'));
     }, this.options.quickSuggestionsDelay);
 
-    const rightClickHandler = this._handleRightClick.bind(this);
-    this.editor.getWrapperElement().addEventListener('contextmenu', rightClickHandler);
-    this.editorListeners.contextmenu = rightClickHandler;
+    // const rightClickHandler = this._handleRightClick.bind(this);
+    // this.editor.getWrapperElement().addEventListener('contextmenu', rightClickHandler);
+    // this.editorListeners.contextmenu = rightClickHandler;
 
     this.editor.on('cursorActivity', debouncedCursor);
     this.editorListeners.cursorActivity = debouncedCursor;
@@ -573,7 +578,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       } as CodeMirror.Position;
 
       this.highlightMarkers.push(this.editor.getDoc().markText(start, end, {
-        css: 'background-color: #dde',
+        className: 'CodeMirror-marked',
       }));
     });
   }
