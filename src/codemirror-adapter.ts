@@ -400,7 +400,10 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
     }
     const word = triggerWord.toLowerCase();
     return items.filter((item: lsProtocol.CompletionItem) => {
-      if (item.filterText && item.filterText.toLowerCase().indexOf(word) === 0) {
+      const commonText = item.filterText || item.insertText || item.label;
+      if (commonText && commonText.toLowerCase() === word) {
+        return false;
+      } else if (item.filterText && item.filterText.toLowerCase().indexOf(word) === 0) {
         return true;
       } else {
         return item.label.toLowerCase().indexOf(word) === 0;
