@@ -163,6 +163,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
     }
 
     const bestCompletions = this._getFilteredCompletions(this.token.text, completions);
+    const tokenText = this.token.text;
 
     let start = this.token.start;
     if (/^\W$/.test(this.token.text)) {
@@ -197,7 +198,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 textNode.classList.add("CodeMirror-hint-text");
                 descNode.classList.add("CodeMirror-hint-desc");
                 iconNode.appendChild(document.createTextNode(CompletionItemKindArray[completion.kind]));
-                textNode.appendChild(document.createTextNode(data.text));
+                textNode.innerHTML = data.text.split(tokenText).join('<span class="matched">' + tokenText + '</span>');
                 descNode.appendChild(document.createTextNode(completion.detail ? completion.detail : ''));
                 Element.appendChild(iconNode);
                 Element.appendChild(textNode);
