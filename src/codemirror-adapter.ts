@@ -190,6 +190,19 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 ret.from = { line: completion.textEdit.range.start.line, ch: completion.textEdit.range.start.character };
                 ret.to = { line: completion.textEdit.range.end.line, ch: completion.textEdit.range.end.character };
               }
+              if (completion.additionalTextEdits) {
+                ret.hint = function(cm:any, self:any, data:any) {
+                  cm.replaceRange(data.text, data.from, data.to, "complete");
+                  for(let i = completion.additionalTextEdits.length; i > 0; i--) {
+                    const edit = completion.additionalTextEdits[i - 1];
+                    cm.replaceRange(
+                      edit.newText,
+                      { line: edit.range.start.line, ch: edit.range.start.character },
+                      { line: edit.range.end.line, ch: edit.range.end.character },
+                    )
+                  }
+                };
+              }
               ret.render = function(Element:any, self:any, data:any) {
                 let iconNode = document.createElement("DIV");
                 let textNode = document.createElement("DIV");
@@ -400,10 +413,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
     }
     const word = triggerWord.toLowerCase();
     return items.filter((item: lsProtocol.CompletionItem) => {
-      const commonText = item.filterText || item.insertText || item.label;
-      if (commonText && commonText.toLowerCase() === word) {
-        return false;
-      } else if (item.filterText && item.filterText.toLowerCase().indexOf(word) === 0) {
+      if (item.filterText && item.filterText.toLowerCase().indexOf(word) === 0) {
         return true;
       } else {
         return item.label.toLowerCase().indexOf(word) === 0;
