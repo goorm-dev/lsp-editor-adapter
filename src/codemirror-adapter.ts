@@ -4,7 +4,7 @@
 import debounce from 'lodash-es/debounce';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Location, LocationLink, MarkupContent } from 'vscode-languageserver-protocol';
-import { getFilledDefaults, IEditorAdapter, ILspConnection, IPosition, ITextEditorOptions, ITokenInfo, CompletionItemKindArray } from './types';
+import { getFilledDefaults, IEditorAdapter, ILspConnection, IPosition, ITextEditorOptions, ITokenInfo, CompletionItemKindArray, CompletionItemClassName } from './types';
 
 interface IScreenCoord {
   x: number;
@@ -204,15 +204,23 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 };
               }
               ret.render = function(Element:any, self:any, data:any) {
+				let iconImgWrapper = document.createElement("SPAN");
+				let iconImg = document.createElement("I");
                 let iconNode = document.createElement("DIV");
                 let textNode = document.createElement("DIV");
                 let descNode = document.createElement("DIV");
+				iconImgWrapper.classList.add("CodeMirror-hint-icoImgWrapper");
+				iconImg.classList.add("gi");
                 iconNode.classList.add("CodeMirror-hint-icon");
                 textNode.classList.add("CodeMirror-hint-text");
                 descNode.classList.add("CodeMirror-hint-desc");
+				let className = CompletionItemClassName[completion.kind] ? CompletionItemClassName[completion.kind] : "gi-text";
+				iconImg.classList.add(className);
                 iconNode.appendChild(document.createTextNode(CompletionItemKindArray[completion.kind]));
                 textNode.innerHTML = data.text.split(tokenText).join('<span class="matched">' + tokenText + '</span>');
                 descNode.appendChild(document.createTextNode(completion.detail ? completion.detail : ''));
+				iconImgWrapper.appendChild(iconImg);
+				Element.appendChild(iconImgWrapper);
                 Element.appendChild(iconNode);
                 Element.appendChild(textNode);
                 Element.appendChild(descNode);

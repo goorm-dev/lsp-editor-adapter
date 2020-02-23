@@ -323,3 +323,32 @@ export const CompletionItemKindArray: Array<string> = [
   'OPERATOR',
   'TYPEPARAMETER'
 ];
+
+export const CompletionItemClassName: Array<string> = [
+	'gi-text',
+	'gi-text',
+	'gi-IntelliSense_method',
+	'gi-function',
+	'gi-class',
+	'gi-IntelliSense_field',
+	'gi-IntelliSense_variable',
+	'gi-IntelliSense_class',
+	'gi-info',
+	'gi-IntelliSense_module',
+	'gi-IntelliSense_property',
+	'gi-sourcecode',
+	'gi-variable',
+	'gi-common',
+ 	'gi-key',
+ 	'gi-source-code',
+ 	'gi-drawing',
+ 	'gi-file',
+ 	'gi-sourcecode',
+ 	'gi-folder',
+ 	'gi-sourcecode',
+ 	'gi-sourcecode',
+ 	'gi-sourcecode',
+ 	'gi-sourcecode',
+ 	'gi-sourcecode',
+ 	'gi-sourcecode'
+]
