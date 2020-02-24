@@ -11,6 +11,12 @@ interface IScreenCoord {
   y: number;
 }
 
+declare global {
+    interface Window {
+        core: any;
+    }
+}
+
 class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
   public options: ITextEditorOptions;
   public editor: CodeMirror.Editor;
@@ -79,6 +85,11 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       this._removeSignatureWidget();
     } else if (completionCharacters.indexOf(typedCharacter) > -1) {
       this.token = this._getTokenEndingAtPosition(code, location, completionCharacters);
+      
+      if (window.core.preference['preference.editor.autocomplete'] === 'false' || !window.core.preference['preference.editor.autocomplete']) {
+        return;
+      }
+      
       this.connection.getCompletion(
         location,
         this.token,
@@ -89,6 +100,10 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       this.token = this._getTokenEndingAtPosition(code, location, signatureCharacters);
       this.connection.getSignatureHelp(location);
     } else if (!/\W/.test(typedCharacter)) {
+      if (window.core.preference['preference.editor.autocomplete'] === 'false' || !window.core.preference['preference.editor.autocomplete']) {
+        return;
+      }
+      
       this.connection.getCompletion(
         location,
         this.token,
@@ -229,6 +244,35 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
         };
       },
     } as CodeMirror.ShowHintOptions);
+  }
+  
+  public triggerCompletion() {
+    const location = this.editor.getDoc().getCursor('end');
+    
+    const completionCharacters = this.connection.getLanguageCompletionCharacters();
+    const signatureCharacters = this.connection.getLanguageSignatureCharacters();
+
+    const code = this.editor.getDoc().getValue();
+    const lines = code.split('\n');
+    const line = lines[location.line];
+    const typedCharacter = line[location.ch - 1];
+    
+    if (completionCharacters.indexOf(typedCharacter) > -1) {
+      this.connection.getCompletion(
+        location,
+        this.token,
+        completionCharacters.find((c) => c === typedCharacter),
+        lsProtocol.CompletionTriggerKind.TriggerCharacter,
+      );
+    } else {
+      this.connection.getCompletion(
+        location,
+        this.token,
+        '',
+        lsProtocol.CompletionTriggerKind.Invoked,
+      );
+      this.token = this._getTokenEndingAtPosition(code, location, completionCharacters.concat(signatureCharacters));
+    }
   }
 
   public handleDiagnostic(response: lsProtocol.PublishDiagnosticsParams) {
