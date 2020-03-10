@@ -197,17 +197,20 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
           from: start,
           to: this.token.end,
           list: [
-            ...(bestCompletions.map(function(completion) {
+            ...(bestCompletions.map(completion => {
               let ret:any = {};
-              ret.text = completion.insertText ? completion.insertText : completion.label;
+              ret.text = ret.displayText = completion.insertText ? completion.insertText : completion.label;
               if (completion.textEdit) {
                 ret.text = completion.textEdit.newText;
                 ret.from = { line: completion.textEdit.range.start.line, ch: completion.textEdit.range.start.character };
                 ret.to = { line: completion.textEdit.range.end.line, ch: completion.textEdit.range.end.character };
               }
+              ret.hint = (cm:any, self:any, data:any) => {
+                this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end);
+              }
               if (completion.additionalTextEdits) {
-                ret.hint = function(cm:any, self:any, data:any) {
-                  cm.replaceRange(data.text, data.from, data.to, "complete");
+                ret.hint = (cm:any, self:any, data:any) => {
+                  this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end);
                   for(let i = completion.additionalTextEdits.length; i > 0; i--) {
                     const edit = completion.additionalTextEdits[i - 1];
                     cm.replaceRange(
@@ -229,7 +232,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 textNode.classList.add("CodeMirror-hint-text");
                 descNode.classList.add("CodeMirror-hint-desc");
                 iconNode.appendChild(iconImg);
-                textNode.innerHTML = data.text.split(tokenText).join('<span class="matched">' + tokenText + '</span>');
+                textNode.innerHTML = data.displayText.split(tokenText).join('<span class="matched">' + tokenText + '</span>');
                 descNode.appendChild(
                   document.createTextNode(CompletionItemKindArray[completion.kind][0].toLowerCase() + (completion.detail ? ' ' + completion.detail : ''))
                 );
@@ -475,6 +478,24 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       const inB = b.label.indexOf(triggerWord) === 0 ? 1 : -1;
       return inA + inB;
     });
+  }
+
+  private _overrideDefaultHintCompletion(cm: any, self: any, data: any, start: any, end: any) {
+    const regexCursorToken = /\$\d+/g;
+    const cursorTokenMatch = regexCursorToken.exec(data.text);
+    let firstCursorTokenIdx = 0;
+    let completionText = data.text;
+    if (cursorTokenMatch) {
+      firstCursorTokenIdx = cursorTokenMatch.index;
+      completionText = completionText.replace(regexCursorToken, "");
+    }
+    cm.replaceRange(completionText, data.from || start, data.to || end, "complete");
+    if (cursorTokenMatch) {
+      cm.setCursor({
+        line: data.from.line,
+        ch: data.from.ch + firstCursorTokenIdx
+      });
+    }
   }
 
   private _isEventInsideVisible(ev: MouseEvent) {
