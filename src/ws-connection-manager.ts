@@ -158,13 +158,32 @@ class LspWsConnectionManager extends events.EventEmitter {
           didChangeConfiguration: {
             dynamicRegistration: true,
           },
+          executeCommand: {
+            dynamicRegistration: true
+          },
+          configuration: true
         } as lsProtocol.WorkspaceClientCapabilities,
         // xfilesProvider: true,
         // xcontentProvider: true,
       } as lsProtocol.ClientCapabilities,
-      initializationOptions: null,
+      initializationOptions: {
+        extendedClientCapabilities: {
+          classFileContentsSupport: true,
+          overrideMethodsPromptSupport: true,
+          hashCodeEqualsPromptSupport: true,
+          advancedOrganizeImportsSupport: true,
+          generateToStringPromptSupport: true,
+          advancedGenerateAccessorsSupport: true,
+          generateConstructorsPromptSupport: true,
+          generateDelegateMethodsPromptSupport: true,
+          advancedExtractRefactoringSupport: true,
+          moveRefactoringSupport: true,
+          clientHoverProvider: true,
+        }
+      },
       processId: null,
       rootUri: this.documentInfo.rootUri,
+      rootPath: this.documentInfo.rootUri,
       workspaceFolders: null,
     };
 
