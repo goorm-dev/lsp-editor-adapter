@@ -206,11 +206,11 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
                 ret.to = { line: completion.textEdit.range.end.line, ch: completion.textEdit.range.end.character };
               }
               ret.hint = (cm:any, self:any, data:any) => {
-                this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end);
+                this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end, completion);
               }
               if (completion.additionalTextEdits) {
                 ret.hint = (cm:any, self:any, data:any) => {
-                  this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end);
+                  this._overrideDefaultHintCompletion(cm, self, data, start, this.token.end, completion);
                   for(let i = completion.additionalTextEdits.length; i > 0; i--) {
                     const edit = completion.additionalTextEdits[i - 1];
                     cm.replaceRange(
@@ -480,11 +480,16 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
     });
   }
 
-  private _overrideDefaultHintCompletion(cm: any, self: any, data: any, start: any, end: any) {
+  private _overrideDefaultHintCompletion(cm: any, self: any, data: any, start: any, end: any, completion: lsProtocol.CompletionItem) {
     const regexCursorToken = /\$\d+/g;
-    const cursorTokenMatch = regexCursorToken.exec(data.text);
-    let firstCursorTokenIdx = 0;
+    let cursorTokenMatch = regexCursorToken.exec(data.text);
     let completionText = data.text;
+    let firstCursorTokenIdx = 0;
+    if (!cursorTokenMatch && (completion.kind === 2 || completion.kind === 3)) {
+      data.text += "($1)";
+      cursorTokenMatch = regexCursorToken.exec(data.text);
+      completionText = data.text;
+    }
     if (cursorTokenMatch) {
       firstCursorTokenIdx = cursorTokenMatch.index;
       completionText = completionText.replace(regexCursorToken, "");
@@ -492,8 +497,8 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
     cm.replaceRange(completionText, data.from || start, data.to || end, "complete");
     if (cursorTokenMatch) {
       cm.setCursor({
-        line: data.from.line,
-        ch: data.from.ch + firstCursorTokenIdx
+        line: (data.from && data.from.line) || start.line,
+        ch: ((data.from && data.from.ch) || start.ch) + firstCursorTokenIdx
       });
     }
   }
