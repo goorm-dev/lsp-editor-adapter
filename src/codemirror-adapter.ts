@@ -438,6 +438,7 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       };
     }
 
+    const curToken = this.editor.getTokenAt(location);
     let wordStartChar = 0;
     for (let i = location.ch - 1; i >= 0; i--) {
       const char = line[i];
@@ -447,7 +448,8 @@ class CodeMirrorAdapter extends IEditorAdapter<CodeMirror.Editor> {
       wordStartChar = i;
     }
     return {
-      text: line.substr(wordStartChar, location.ch),
+      // text: line.substr(wordStartChar, location.ch - 1),
+      text: curToken.string,
       start: {
         line: location.line,
         ch: wordStartChar,
