@@ -6,6 +6,12 @@ import { LocationLink, ServerCapabilities } from 'vscode-languageserver-protocol
 import { registerServerCapability, unregisterServerCapability } from './server-capability-registration';
 import { ILspConnection, ILspOptions, IPosition, ITokenInfo, ICallback } from './types';
 
+declare global {
+  interface Window {
+    goorm: any;
+  }
+}
+
 interface IFilesServerClientCapabilities {
   /* ... all fields from the base ClientCapabilities ... */
 
@@ -251,6 +257,7 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
       return;
     }
 
+    const curHintIndex = window.goorm.core.edit.codeassist.hint.hintIndex;
     this.connection.sendRequest('textDocument/completion', {
       textDocument: {
         uri: this.documentInfo.documentUri,
@@ -264,6 +271,10 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
         triggerCharacter,
       },
     } as lsProtocol.CompletionParams).then((params: lsProtocol.CompletionList | lsProtocol.CompletionItem[] | null) => {
+      if (curHintIndex !== window.goorm.core.edit.codeassist.hint.hintIndex) {
+        this.emit('completion', []);
+        return;
+      }
       if (!params) {
         this.emit('completion', params);
         return;
