@@ -507,8 +507,10 @@ class LspWsConnection extends events.EventEmitter implements ILspConnection {
     }
 	  
     this.connection.sendRequest(method, data).then((ret: any) => {
-	    cb(null, ret);
-	});
+      cb(null, ret);
+    }, (e: Error) => {
+      cb(new Error(e.message), null);
+    });
   }
 }
 
